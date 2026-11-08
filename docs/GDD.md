@@ -27,7 +27,7 @@ who answers you) responds. Repeat across locations toward the water.
 | Player movement    | ✅ vertical slice | Top-down; wall collision pending. |
 | Journal            | Persistence implemented; reader pending | Reading the keeper log records a unique entry; a re-readable journal UI remains planned. |
 | Second location    | ⏳ demo           | The lamp room. |
-| Controller + remap  | ⏳ demo          | Currently keyboard-only, built-in actions. |
+| Controller + remap  | Bindings present; verification and remapping pending | Gamepad bindings exist in the input map; full controller play is not yet verified. |
 | Localization        | ⏳ press build    | String extraction + translation tables. |
 | Accessibility       | ⏳ press build    | Text scale, dyslexia-friendly font, no-flash. |
 | Steam integration   | ⏳ launch         | Achievements, cloud saves. |
@@ -35,7 +35,8 @@ who answers you) responds. Repeat across locations toward the water.
 ## Save, Continue, and journal
 
 Save is an explicit pause-menu action. Continue restores story flags and ordered
-journal discoveries, then reconstructs the saved scene at its default spawn.
+journal discoveries, then reloads the saved scene. On the ground floor, the
+player starts at the default spawn; the lamp-room scaffold has no player yet.
 Player position and dialogue progress are not saved. Existing story-choice
 flags retain their names and values, including false values.
 
@@ -47,8 +48,10 @@ The lamp room remains a gameplay scaffold.
 
 New Game clears flags and journal in memory; the previous disk slot remains
 until the player explicitly saves again. Returning to the main menu does not
-autosave. Invalid or unsupported saves report a Continue failure without
-replacing live state. Journal discovery/persistence is implemented; the reader
+autosave. If save validation fails, Continue reports failure without replacing
+live state. If loading succeeds but the subsequent scene change fails, Continue
+reports failure after the saved state has already been restored; it does not
+roll that state back. Journal discovery/persistence is implemented; the reader
 UI and Steam Cloud integration remain pending.
 
 See the [save/Continue behavior contract](save-journal.md) for implementation
