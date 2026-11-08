@@ -1,6 +1,9 @@
-# Save / Continue audit and Sprint 29 acceptance
+# Save / Continue behavior contract
 
-Baseline audited: `8c9b1e4` (public-demo candidate).
+Baseline audited: `8c9b1e4` (public-demo candidate). Persistence implementation: `cb4c363`.
+
+For test steps, evidence, and outstanding acceptance work, see the
+[regression checklist](journal-save-regression.md).
 
 | State | Baseline save / Continue | With this change |
 |---|---|---|
@@ -30,6 +33,10 @@ Re-reading the log discovers it normally.
 
 Version 2 keeps `scene` and `flags` and adds `journal_entries` (array of IDs).
 Unversioned and version 1 files load using the legacy shape and an empty journal.
+Supported scene paths are `res://scenes/game.tscn` and
+`res://scenes/lamp_room.tscn`. Saves naming other or renamed scenes are rejected
+until an explicit migration exists.
+
 Missing scene/flags/journal fields use the existing default scene, empty flags,
 and empty journal respectively. A subsequent explicit save writes v2.
 New Game clears in-memory flags and journal, but retains the on-disk slot until
@@ -46,47 +53,3 @@ rename over the slot. Open/write/rename failures return false. The implementatio
 does not claim full power-loss durability, backup recovery, concurrent-process
 coordination, or Steam Cloud conflict handling. Those need platform testing.
 
-## Automated checks
-
-Use Godot 4.3+ and an isolated user-data directory: tests intentionally create
-and delete `user://save.json`. On Linux, from the repository root:
-
-```sh
-export XDG_DATA_HOME="$(mktemp -d)"
-godot --headless --path . --editor --import --quit
-godot --headless --path . tests/save_journal.tscn
-godot --headless --path . tests/save_journal.tscn -- --write-cycle
-godot --headless --path . tests/save_journal.tscn -- --read-cycle
-python3 tests/validate_dialogue.py
-```
-
-On Windows/macOS run in a disposable test user/project data directory.
-Corruption and forced-write-failure cases deliberately print engine errors;
-the integration runner's exit code and failure count determine success.
-
-Coverage: deduplication, blank discovery, copy isolation, ordering, unknown IDs,
-flag false values and unknown keys, new-game reset, repeated load, legacy and
-unversioned migration, unsupported versions, malformed fields, missing/truncated
-files, failure without live-state mutation, write-open failure preserving the
-old slot, real logbook dialogue choices, and a separate-process disk cycle.
-
-## Before calling the launch path done
-
-- [ ] Run the actual menu: read log → choose both story branches in separate
-  runs → Save → quit application → Continue → revisit log; one entry remains.
-- [ ] Verify controller and keyboard Continue failure text fits and stays usable.
-- [ ] Exercise scene reconstruction from both supported scene paths in exported
-  builds. The lamp room is still a scaffold, and the stair currently only plays
-  dialogue; this change does not make that chapter playable.
-- [ ] Test disk full, denied permissions, rename failure/locked file, and process
-  interruption before/after replacement on every shipping OS/filesystem.
-- [ ] Decide backup/recovery and Steam Cloud conflict policy, including two
-  running instances and downgrading to an older binary (which would discard
-  journal entries when it saves).
-- [ ] Ship the journal reader/content catalog; unknown IDs must render a safe
-  fallback. There is still no reader UI in this change.
-- [ ] Decide whether launch needs position or mid-dialogue resume; current
-  semantics are scene checkpoints with explicit manual saves.
-
-Passing persistence checks completes this state-hardening slice, not the above
-launch acceptance work or the playtest feedback loop as a whole.

@@ -22,15 +22,39 @@ who answers you) responds. Repeat across locations toward the water.
 | System | State | Notes |
 |--------|-------|-------|
 | Branching dialogue | ✅ vertical slice | JSON graphs, choices set flags. |
-| Save / load        | ✅ vertical slice | Single slot, `user://save.json`. |
+| Save / load        | Implemented; launch checks pending | Manual single slot, `user://save.json`; scene, story flags, and journal discoveries. |
 | Menus + settings   | ✅ vertical slice | Title, pause, volume, fullscreen. |
 | Player movement    | ✅ vertical slice | Top-down; wall collision pending. |
-| Journal            | ⏳ demo           | Tracks discovered logs; re-readable. |
+| Journal            | Persistence implemented; reader pending | Reading the keeper log records a unique entry; a re-readable journal UI remains planned. |
 | Second location    | ⏳ demo           | The lamp room. |
 | Controller + remap  | ⏳ demo          | Currently keyboard-only, built-in actions. |
 | Localization        | ⏳ press build    | String extraction + translation tables. |
 | Accessibility       | ⏳ press build    | Text scale, dyslexia-friendly font, no-flash. |
 | Steam integration   | ⏳ launch         | Achievements, cloud saves. |
+
+## Save, Continue, and journal
+
+Save is an explicit pause-menu action. Continue restores story flags and ordered
+journal discoveries, then reconstructs the saved scene at its default spawn.
+Player position and dialogue progress are not saved. Existing story-choice
+flags retain their names and values, including false values.
+
+Valid version 1 and unversioned saves retain their flags and supported scene,
+with an empty journal because discovery was not recorded in those formats.
+The supported scene paths are `res://scenes/game.tscn` and
+`res://scenes/lamp_room.tscn`; other paths require an explicit migration.
+The lamp room remains a gameplay scaffold.
+
+New Game clears flags and journal in memory; the previous disk slot remains
+until the player explicitly saves again. Returning to the main menu does not
+autosave. Invalid or unsupported saves report a Continue failure without
+replacing live state. Journal discovery/persistence is implemented; the reader
+UI and Steam Cloud integration remain pending.
+
+See the [save/Continue behavior contract](save-journal.md) for implementation
+details and the [regression checklist](journal-save-regression.md) for verified
+coverage and outstanding launch checks. Feature implementation is not launch
+sign-off.
 
 ## Interaction design
 
