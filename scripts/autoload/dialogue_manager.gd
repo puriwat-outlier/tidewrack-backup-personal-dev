@@ -54,6 +54,7 @@ func choose(index: int) -> void:
 		return
 	var choice: Dictionary = choices[index]
 	_apply_flags(choice.get("set_flag", {}))
+	_apply_journal(choice)
 	var next: Variant = choice.get("next", null)
 	if next == null:
 		_finish()
@@ -69,6 +70,7 @@ func _goto(id: String) -> void:
 	_current_id = id
 	var node: Dictionary = _graph[id]
 	_apply_flags(node.get("set_flag", {}))
+	_apply_journal(node)
 	line_shown.emit(
 		str(node.get("speaker", "")),
 		str(node.get("text", "")),
@@ -79,6 +81,13 @@ func _goto(id: String) -> void:
 func _apply_flags(dict: Dictionary) -> void:
 	for key in dict:
 		GameState.set_flag(str(key), dict[key])
+
+
+## Explicit content hook; never reinterpret or rename existing story flags.
+func _apply_journal(node: Dictionary) -> void:
+	var id: Variant = node.get("journal_entry", "")
+	if typeof(id) == TYPE_STRING:
+		Journal.discover(id)
 
 
 func _finish() -> void:

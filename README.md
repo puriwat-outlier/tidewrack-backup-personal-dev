@@ -85,6 +85,9 @@ Any node can set story flags via `"set_flag"`, which `GameState` persists.
 }
 ```
 
+See [save/Continue contract and acceptance checklist](docs/save-journal.md) for
+journal persistence, legacy compatibility, and isolated integration tests.
+
 ## Verifying changes
 
 ```bash
